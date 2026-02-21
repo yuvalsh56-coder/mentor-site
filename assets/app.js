@@ -1,6 +1,56 @@
 function el(id){return document.getElementById(id)}
 function qs(name){return new URLSearchParams(location.search).get(name)}
 
+const FALLBACK_PEOPLE = [
+  {
+    "id": 1,
+    "name": "אדם לרנר"
+  },
+  {
+    "id": 2,
+    "name": "אושר קריספל"
+  },
+  {
+    "id": 3,
+    "name": "אליהו דבקרוב"
+  },
+  {
+    "id": 4,
+    "name": "בניהו שמואליאן"
+  },
+  {
+    "id": 5,
+    "name": "הראל רחימי"
+  },
+  {
+    "id": 6,
+    "name": "יניב לוריה"
+  },
+  {
+    "id": 7,
+    "name": "ליעד לביא"
+  },
+  {
+    "id": 8,
+    "name": "נויה קלדרון"
+  },
+  {
+    "id": 9,
+    "name": "עידו גרשום"
+  },
+  {
+    "id": 10,
+    "name": "עידן זוראל"
+  },
+  {
+    "id": 11,
+    "name": "שראל אלסיט"
+  },
+  {
+    "id": 12,
+    "name": "מיכל פיגרין"
+  }
+];
 function setSaveModeLabel(text){
   const el = document.getElementById("saveMode");
   if(el) el.textContent = text;
@@ -179,10 +229,22 @@ async function openDocModal(person, week, docKey){
   show();
 }
 
+async function loadPeople(){
+  try{
+    const r = await fetch("/assets/people.json", { cache: "no-store" });
+    if(!r.ok) throw new Error("people.json missing");
+    const j = await r.json();
+    if(Array.isArray(j) && j.length) return j;
+    throw new Error("people.json empty");
+  }catch(e){
+    return FALLBACK_PEOPLE;
+  }
+}
+
 async function renderStaff(){
   const list = el("staffList");
   if(!list) return;
-  const people = await fetch("/assets/people.json").then(r=>r.json());
+  const people = await loadPeople();
   list.innerHTML = people.map(p=>(
     `<a class="person" href="/person.html?p=${p.id}">
       <span class="name">${escapeHtml(p.name)}</span><span class="go">כניסה</span>
@@ -193,7 +255,7 @@ async function renderStaff(){
 async function renderPerson(){
   const pid = qs("p");
   if(!pid){ location.href="/staff.html"; return; }
-  const people = await fetch("/assets/people.json").then(r=>r.json());
+  const people = await loadPeople();
   const person = people.find(x=>String(x.id)===String(pid));
   if(!person){ location.href="/staff.html"; return; }
 
