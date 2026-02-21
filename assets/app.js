@@ -160,24 +160,18 @@ async function openDocModal(person, week, docKey){
   async function save(){
     const data = formToObject(form);
     const payload = { savedAt: new Date().toISOString(), data };
-    // אם מחובר – נשמור בענן. אם לא – נשמור בדפדפן.
     try{
-      if(identityUser()){
-        await cloudSet(person.id, week, docKey, payload);
-        saveState.textContent="נשמר בענן ✅";
-      }else{
-        localStorage.setItem(storageKey(person.id, week, docKey), JSON.stringify(payload));
-        saveState.textContent="נשמר בדפדפן ✅";
-      }
+      await cloudSet(person.id, week, docKey, payload);
+      saveState.textContent="נשמר בענן ✅";
     }catch(e){
-      // נפילה לענן -> בדפדפן
+      // גיבוי בדפדפן אם יש בעיית רשת/שרת
       localStorage.setItem(storageKey(person.id, week, docKey), JSON.stringify(payload));
-      saveState.textContent="נשמר בדפדפן ✅";
+      saveState.textContent="נשמר בדפדפן (גיבוי) ✅";
     }
   }
 
-
   loadSaved();
+
   saveBtn.onclick = save;
   reloadBtn.onclick = loadSaved;
   closeBtn.onclick = hide;
@@ -244,31 +238,57 @@ function exportCurrentDocToPDF(){
       alert("ספריית PDF לא נטענה. נסה רענון.");
       return;
     }
-    const modal = document.querySelector(".modal");
-    const card = modal && modal.querySelector(".modal-card");
-    if(!card){
-      alert("לא נמצא מסמך לייצוא.");
+    const backdrop = document.getElementById("modalBackdrop");
+    const modal = backdrop && backdrop.querySelector(".modal");
+    const formEl = document.getElementById("docForm");
+    if(!backdrop || !modal || !formEl || !backdrop.classList.contains("open")){
+      alert("פתח מסמך ואז לחץ ייצוא PDF.");
       return;
     }
 
-    // יוצרים עותק נקי ל-PDF (בלי כפתורים/חיווי)
-    const clone = card.cloneNode(true);
+    // בונים עותק נקי להדפסה
+    const wrapper = document.createElement("div");
+    wrapper.style.direction = "rtl";
+    wrapper.style.fontFamily = "Heebo, Arial, sans-serif";
 
-    // הסרת כפתורים בחלק העליון/תחתון
-    clone.querySelectorAll("button").forEach(b => b.remove());
-
-    // נוחות: כותרת מסמך בראש
     const titleEl = document.getElementById("modalTitle");
     const title = titleEl ? titleEl.textContent.trim() : "מסמך";
+
     const h = document.createElement("h2");
     h.textContent = title;
-    h.style.cssText = "margin:0 0 10px 0; font-family:Heebo,Arial,sans-serif; text-align:right;";
-    clone.prepend(h);
+    h.style.cssText = "margin:0 0 10px 0; text-align:right;";
+    wrapper.appendChild(h);
 
-    // שם+שבוע בקובץ
+    // מוסיפים את טופס המסמך עצמו (העתקה)
+    const cloneForm = formEl.cloneNode(true);
+
+    // נורמליזציה: הופכים שדות textarea/input לטקסט סטטי כדי שה-PDF יכלול את הערכים
+    cloneForm.querySelectorAll("textarea").forEach(t=>{
+      const div = document.createElement("div");
+      div.style.whiteSpace = "pre-wrap";
+      div.style.border = "1px solid #e5e7eb";
+      div.style.borderRadius = "10px";
+      div.style.padding = "10px";
+      div.style.margin = "6px 0 14px";
+      div.textContent = t.value || "";
+      t.replaceWith(div);
+    });
+    cloneForm.querySelectorAll("input").forEach(i=>{
+      const span = document.createElement("div");
+      span.style.border = "1px solid #e5e7eb";
+      span.style.borderRadius = "10px";
+      span.style.padding = "8px 10px";
+      span.style.margin = "6px 0 14px";
+      span.textContent = i.value || "";
+      i.replaceWith(span);
+    });
+
+    wrapper.appendChild(cloneForm);
+
     const pid = qs("personId") || "person";
     const week = qs("week") || "week";
-    const filename = `${pid}-${week}-${title}`.replace(/[\\/:*?"<>|]/g, "_") + ".pdf";
+    const safe = (s)=> String(s).replace(/[\/:*?"<>|]/g, "_");
+    const filename = safe(`${pid}-${week}-${title}`) + ".pdf";
 
     const opt = {
       margin: 10,
@@ -278,7 +298,7 @@ function exportCurrentDocToPDF(){
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
     };
 
-    html2pdf().set(opt).from(clone).save();
+    html2pdf().set(opt).from(wrapper).save();
   }catch(e){
     alert("שגיאה בייצוא PDF");
   }
@@ -288,5 +308,7 @@ document.addEventListener("click", function(e){
   const t = e.target;
   if(t && t.id === "pdfBtn"){
     exportCurrentDocToPDF();
+  }
+});
   }
 });
