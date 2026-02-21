@@ -10,6 +10,7 @@
   <title>תיקייה</title>
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   <script defer src="/assets/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <div class="topbar">
@@ -45,9 +46,10 @@
 
       <div style="display:flex; gap:10px; justify-content:flex-end; padding:12px 0 4px;">
         <button class="btn secondary" type="button" id="reloadBtn">טען גרסה שמורה</button>
+        <button class="btn secondary" type="button" id="pdfBtn">ייצוא PDF</button>
         <button class="btn primary" type="button" id="saveBtn">שמירה</button>
       </div>
-      <div class="small" style="padding-bottom:6px;">שמירה כאן נשמרת בדפדפן של המכשיר. אם תפתח ממכשיר אחר – זה לא יופיע.</div>
+      <div class="small" style="padding-bottom:6px;">שמירה כאן נשמרת בענן משותף (זמין מכל מכשיר). אם תפתח ממכשיר אחר – זה לא יופיע.</div>
     </div>
   </div>
 

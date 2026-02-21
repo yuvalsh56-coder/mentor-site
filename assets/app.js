@@ -14,31 +14,27 @@ async function identityToken(){
   if(!u) return null;
   try{ return await u.jwt(); }catch{ return null; }
 }
-function initIdentityUI(){
-  if(!window.netlifyIdentity) return;
-  window.netlifyIdentity.on("init", user=>{
-    setSaveModeLabel(user ? "שמירה: בענן" : "שמירה: בדפדפן");
-  });
-  window.netlifyIdentity.on("login", ()=>setSaveModeLabel("שמירה: בענן"));
-  window.netlifyIdentity.on("logout", ()=>setSaveModeLabel("שמירה: בדפדפן"));
-  window.netlifyIdentity.init();
-}
+function initIdentityUI(){ /* לא נדרש בגרסה הזו */ }
 
 async function cloudGet(personId, week, docKey){
-  const token = await identityToken();
-  if(!token) return null;
   const url = `/.netlify/functions/data?personId=${encodeURIComponent(personId)}&week=${encodeURIComponent(week)}&docKey=${encodeURIComponent(docKey)}`;
-  const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+  const res = await fetch(url);
   if(!res.ok) return null;
-  const js = await res.json();
-  return js.data || null;
+  const j = await res.json();
+  return j && j.ok ? (j.data || null) : null;
 }
 async function cloudSet(personId, week, docKey, payload){
-  const token = await identityToken();
-  if(!token) throw new Error("צריך התחברות כדי לשמור בענן");
   const url = `/.netlify/functions/data?personId=${encodeURIComponent(personId)}&week=${encodeURIComponent(week)}&docKey=${encodeURIComponent(docKey)}`;
-  const res = await fetch(url, { method:"POST", headers: { "Content-Type":"application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(payload) });
-  if(!res.ok) throw new Error("שגיאה בשמירה בענן");
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){
+    const t = await res.text().catch(()=> "");
+    throw new Error(t || "שגיאה בשמירה בענן");
+  }
+  return true;
 }
 
 function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -237,5 +233,60 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
   if(path.endsWith("/person.html") || path.endsWith("/person")){
     await renderPerson();
+  }
+});
+
+
+// ===== ייצוא PDF למסמך הפתוח =====
+function exportCurrentDocToPDF(){
+  try{
+    if(typeof html2pdf === "undefined"){
+      alert("ספריית PDF לא נטענה. נסה רענון.");
+      return;
+    }
+    const modal = document.querySelector(".modal");
+    const card = modal && modal.querySelector(".modal-card");
+    if(!card){
+      alert("לא נמצא מסמך לייצוא.");
+      return;
+    }
+
+    // יוצרים עותק נקי ל-PDF (בלי כפתורים/חיווי)
+    const clone = card.cloneNode(true);
+
+    // הסרת כפתורים בחלק העליון/תחתון
+    clone.querySelectorAll("button").forEach(b => b.remove());
+
+    // נוחות: כותרת מסמך בראש
+    const titleEl = document.getElementById("modalTitle");
+    const title = titleEl ? titleEl.textContent.trim() : "מסמך";
+    const h = document.createElement("h2");
+    h.textContent = title;
+    h.style.cssText = "margin:0 0 10px 0; font-family:Heebo,Arial,sans-serif; text-align:right;";
+    clone.prepend(h);
+
+    // שם+שבוע בקובץ
+    const pid = qs("personId") || "person";
+    const week = qs("week") || "week";
+    const filename = `${pid}-${week}-${title}`.replace(/[\\/:*?"<>|]/g, "_") + ".pdf";
+
+    const opt = {
+      margin: 10,
+      filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+    };
+
+    html2pdf().set(opt).from(clone).save();
+  }catch(e){
+    alert("שגיאה בייצוא PDF");
+  }
+}
+
+document.addEventListener("click", function(e){
+  const t = e.target;
+  if(t && t.id === "pdfBtn"){
+    exportCurrentDocToPDF();
   }
 });
