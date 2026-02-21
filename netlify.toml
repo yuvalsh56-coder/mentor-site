@@ -1,0 +1,13 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[[redirects]]
+  from = "/person"
+  to = "/person.html"
+  status = 200
+
+[[redirects]]
+  from = "/staff"
+  to = "/staff.html"
+  status = 200
