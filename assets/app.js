@@ -1,44 +1,34 @@
 function el(id){return document.getElementById(id)}
 function qs(name){return new URLSearchParams(location.search).get(name)}
 
+const FALLBACK_PEOPLE = [{"id": 1, "name": "אדם לרנר"}, {"id": 2, "name": "אושר קריספל"}, {"id": 3, "name": "אליהו דבקרוב"}, {"id": 4, "name": "בניהו שמואליאן"}, {"id": 5, "name": "הראל רחימי"}, {"id": 6, "name": "יניב לוריה"}, {"id": 7, "name": "ליעד לביא"}, {"id": 8, "name": "נויה קלדרון"}, {"id": 9, "name": "עידו גרשום"}, {"id": 10, "name": "עידן זוראל"}, {"id": 11, "name": "שראל אלסיט"}, {"id": 12, "name": "מיכל פיגרין"}];
+
 function setSaveModeLabel(text){
   const el = document.getElementById("saveMode");
   if(el) el.textContent = text;
 }
 
-function identityUser(){
-  try{ return window.netlifyIdentity && window.netlifyIdentity.currentUser(); }catch{ return null; }
-}
-async function identityToken(){
-  const u = identityUser();
-  if(!u) return null;
-  try{ return await u.jwt(); }catch{ return null; }
-}
-function initIdentityUI(){
-  if(!window.netlifyIdentity) return;
-  window.netlifyIdentity.on("init", user=>{
-    setSaveModeLabel(user ? "שמירה: בענן" : "שמירה: בדפדפן");
-  });
-  window.netlifyIdentity.on("login", ()=>setSaveModeLabel("שמירה: בענן"));
-  window.netlifyIdentity.on("logout", ()=>setSaveModeLabel("שמירה: בדפדפן"));
-  window.netlifyIdentity.init();
-}
+function initIdentityUI(){ /* אין התחברות בגרסה זו */ setSaveModeLabel("שמירה: בענן משותף"); }
 
 async function cloudGet(personId, week, docKey){
-  const token = await identityToken();
-  if(!token) return null;
   const url = `/.netlify/functions/data?personId=${encodeURIComponent(personId)}&week=${encodeURIComponent(week)}&docKey=${encodeURIComponent(docKey)}`;
-  const res = await fetch(url, { headers: { "Authorization": `Bearer ${token}` } });
+  const res = await fetch(url, { cache: "no-store" });
   if(!res.ok) return null;
   const js = await res.json();
   return js.data || null;
 }
 async function cloudSet(personId, week, docKey, payload){
-  const token = await identityToken();
-  if(!token) throw new Error("צריך התחברות כדי לשמור בענן");
   const url = `/.netlify/functions/data?personId=${encodeURIComponent(personId)}&week=${encodeURIComponent(week)}&docKey=${encodeURIComponent(docKey)}`;
-  const res = await fetch(url, { method:"POST", headers: { "Content-Type":"application/json", "Authorization": `Bearer ${token}` }, body: JSON.stringify(payload) });
-  if(!res.ok) throw new Error("שגיאה בשמירה בענן");
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  if(!res.ok){
+    const t = await res.text().catch(()=> "");
+    throw new Error(t || "שגיאה בשמירה בענן");
+  }
+  return true;
 }
 
 function escapeHtml(s){return (s||"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
@@ -164,22 +154,14 @@ async function openDocModal(person, week, docKey){
   async function save(){
     const data = formToObject(form);
     const payload = { savedAt: new Date().toISOString(), data };
-    // אם מחובר – נשמור בענן. אם לא – נשמור בדפדפן.
     try{
-      if(identityUser()){
-        await cloudSet(person.id, week, docKey, payload);
-        saveState.textContent="נשמר בענן ✅";
-      }else{
-        localStorage.setItem(storageKey(person.id, week, docKey), JSON.stringify(payload));
-        saveState.textContent="נשמר בדפדפן ✅";
-      }
+      await cloudSet(person.id, week, docKey, payload);
+      saveState.textContent="נשמר בענן ✅";
     }catch(e){
-      // נפילה לענן -> בדפדפן
       localStorage.setItem(storageKey(person.id, week, docKey), JSON.stringify(payload));
-      saveState.textContent="נשמר בדפדפן ✅";
+      saveState.textContent="נשמר בדפדפן (גיבוי) ✅";
     }
   }
-
 
   loadSaved();
   saveBtn.onclick = save;
@@ -189,10 +171,22 @@ async function openDocModal(person, week, docKey){
   show();
 }
 
+async async function loadPeople(){
+  try{
+    const r = await fetch("/assets/people.json", { cache: "no-store" });
+    if(!r.ok) throw new Error("people.json missing");
+    const j = await r.json();
+    if(Array.isArray(j) && j.length) return j;
+    throw new Error("people.json empty");
+  }catch(e){
+    return FALLBACK_PEOPLE;
+  }
+}
+
 async function renderStaff(){
   const list = el("staffList");
   if(!list) return;
-  const people = await fetch("/assets/people.json").then(r=>r.json());
+  const people = await loadPeople();
   list.innerHTML = people.map(p=>(
     `<a class="person" href="/person.html?p=${p.id}">
       <span class="name">${escapeHtml(p.name)}</span><span class="go">כניסה</span>
@@ -203,7 +197,7 @@ async function renderStaff(){
 async function renderPerson(){
   const pid = qs("p");
   if(!pid){ location.href="/staff.html"; return; }
-  const people = await fetch("/assets/people.json").then(r=>r.json());
+  const people = await loadPeople();
   const person = people.find(x=>String(x.id)===String(pid));
   if(!person){ location.href="/staff.html"; return; }
 
@@ -237,5 +231,79 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   }
   if(path.endsWith("/person.html") || path.endsWith("/person")){
     await renderPerson();
+  }
+});
+
+// ===== ייצוא PDF למסמך הפתוח =====
+function exportCurrentDocToPDF(){
+  try{
+    if(typeof html2pdf === "undefined"){
+      alert("ספריית PDF לא נטענה. נסה רענון.");
+      return;
+    }
+    const backdrop = document.getElementById("modalBackdrop");
+    const formEl = document.getElementById("docForm");
+    if(!backdrop || !formEl || !backdrop.classList.contains("open")){
+      alert("פתח מסמך ואז לחץ ייצוא PDF.");
+      return;
+    }
+
+    const wrapper = document.createElement("div");
+    wrapper.style.direction = "rtl";
+    wrapper.style.fontFamily = "Heebo, Arial, sans-serif";
+
+    const titleEl = document.getElementById("modalTitle");
+    const title = titleEl ? titleEl.textContent.trim() : "מסמך";
+    const h = document.createElement("h2");
+    h.textContent = title;
+    h.style.cssText = "margin:0 0 10px 0; text-align:right;";
+    wrapper.appendChild(h);
+
+    const cloneForm = formEl.cloneNode(true);
+
+    cloneForm.querySelectorAll("textarea").forEach(t=>{
+      const div = document.createElement("div");
+      div.style.whiteSpace = "pre-wrap";
+      div.style.border = "1px solid #e5e7eb";
+      div.style.borderRadius = "10px";
+      div.style.padding = "10px";
+      div.style.margin = "6px 0 14px";
+      div.textContent = t.value || "";
+      t.replaceWith(div);
+    });
+    cloneForm.querySelectorAll("input").forEach(i=>{
+      const div = document.createElement("div");
+      div.style.border = "1px solid #e5e7eb";
+      div.style.borderRadius = "10px";
+      div.style.padding = "8px 10px";
+      div.style.margin = "6px 0 14px";
+      div.textContent = i.value || "";
+      i.replaceWith(div);
+    });
+
+    wrapper.appendChild(cloneForm);
+
+    const pid = qs("p") || "person";
+    const weekTxt = document.getElementById("modalWeek") ? document.getElementById("modalWeek").textContent.trim() : "week";
+    const safe = (s)=> String(s).replace(/[\\/:*?"<>|]/g, "_");
+    const filename = safe(`${pid}-${weekTxt}-${title}`) + ".pdf";
+
+    const opt = {
+      margin: 10,
+      filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+    };
+
+    html2pdf().set(opt).from(wrapper).save();
+  }catch(e){
+    alert("שגיאה בייצוא PDF");
+  }
+}
+document.addEventListener("click", (e)=>{
+  const t = e.target;
+  if(t && t.id === "pdfBtn"){
+    exportCurrentDocToPDF();
   }
 });
