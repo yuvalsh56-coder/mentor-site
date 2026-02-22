@@ -2,114 +2,53 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>חוברת חניכה</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/style.css">
-  <title>חניכה</title>
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-  <script defer src="/assets/app.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css" />
 </head>
 <body>
-  <div class="topbar">
-    <div class="topbar-inner">
-      <nav class="nav" aria-label="תפריט">
+  <header class="topbar">
+    <div class="inner">
+      <div class="brand">חוברת חניכה</div>
+      <nav class="nav">
         <a class="active" href="/">דף הבית</a>
-        <a href="/staff.html">סגל</a>
+        <a href="/staff.html">צוערים</a>
       </nav>
-      <span class="badge" id="saveMode">שמירה: בדפדפן</span>
     </div>
-  </div>
+  </header>
 
   <main class="container">
-    <div class="grid">
-      <section class="card half">
-        <h1 class="h1">מעגל החניכה</h1>
-        <p class="small">מעגל החניכה עומד עבורכם ככלי מכוון לביצוע הערכה מיטבית.</p>
-        <div class="h2">פירוט השלבים</div>
-        <ul>
-          <li><b>1. תצפית והיכרות</b> – צפייה בחונך, הכרת הנחנך, זיהוי חוזקות ואתגרים.</li>
-          <li><b>2. אישור תוכניות</b> – מפגש אישור תוכניות והכנה לשבוע.</li>
-          <li><b>3. צפייה</b> – צפייה והתרשמות תוך כדי מופעים או במהלך היום.</li>
-          <li><b>4. משוב והפקת לקחים</b> – ניתוח השבוע, משוב מובנה, תובנות, יעדים לשיפור.</li>
-          <li><b>5. יישום ושיפור</b> – יישום התובנות בשבוע הבא ומעקב התקדמות.</li>
-        </ul>
-      </section>
+    <section class="card hero">
+      <h1>דף הבית</h1>
+      <p>ברוכים הבאים. כאן נמצא המידע הכללי. לשמירה וטעינה: הכול נשמר בענן משותף (ללא התחברות).</p>
+      <div class="small" style="margin-top:10px;">טיפ: להמשך עבודה היכנסו ל״צוערים״, בחרו צוער/ת, בחרו שבוע ומסמך, מלאו ושמרו.</div>
+    </section>
 
-      <section class="card half">
-        <h1 class="h1">כללים למתן וקבלת משוב</h1>
-        <p class="small">משוב איכותי הוא אחד הכלים החשובים ביותר בתהליך החניכה. הוא מאפשר למידה, צמיחה ושיפור מתמיד.</p>
+    <div class="section-title">מעגל החניכה</div>
+    <section class="card hero">
+      <p>מעגל החניכה עומד עבורכם ככלי מכוון לביצוע הערכה מיטבית.</p>
+      <ol>
+        <li>תצפית והיכרות</li>
+        <li>אישור תוכניות</li>
+        <li>צפייה</li>
+        <li>משוב והפקת לקחים</li>
+        <li>יישום ושיפור</li>
+      </ol>
+    </section>
 
-        <div class="h2">כללי הזהב של משוב בונה</div>
-        <ul>
-          <li><b>ספציפי</b> – הביאו דוגמאות קונקרטיות.</li>
-          <li><b>מאוזן</b> – להציג חוזקות אל מול דברים שצריך לעבוד עליהם.</li>
-          <li><b>מוכוון פעולה</b> – הציעו דרכי פעולה קונקרטיות.</li>
-        </ul>
-
-        <div class="h2">מבנה מומלץ לשיחת משוב</div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:18%;">שלב</th>
-                <th style="width:28%;">תיאור</th>
-                <th style="width:54%;">דוגמאות לשאלות/פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>פתיחה</td><td>יצירת אווירה נעימה, הגדרת מטרות</td><td>“איך אתה מרגיש?” “מה היעדים שלנו היום?”</td></tr>
-              <tr><td>רפלקציה עצמית</td><td>מתן הזדמנות לנחנך לשתף</td><td>“איך הרגשת במהלך...?” “מה היה לך קל/קשה?”</td></tr>
-              <tr><td>משוב מהחונך</td><td>שיתוף תצפיות והמלצות</td><td>שימוש בדוגמאות ספציפיות</td></tr>
-              <tr><td>דיאלוג</td><td>דיון פתוח, הבהרות</td><td>“מה דעתך על...?” “איך אתה רואה את...?”</td></tr>
-              <tr><td>סיכום ותכנון</td><td>הגדרת יעדים ומשימות</td><td>“מה ניקח מפה קדימה?” “מה ננסה בפעם הבאה?”</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="h2">כללים לקבלת משוב</div>
-        <ul>
-          <li>הקשיבו באופן פעיל ופתוח.</li>
-          <li>בקשו הבהרות ודוגמאות.</li>
-          <li>הימנעו מהתגוננות.</li>
-          <li>רשמו נקודות מרכזיות.</li>
-          <li>הודו על המשוב – גם אם הוא מאתגר.</li>
-        </ul>
-      </section>
-    </div>
-
-    <div class="footerbar">
-      <div class="footerbar-inner">
-        <a class="btn primary" href="/staff.html">כניסה לסגל</a>
-      </div>
-    </div>
+    <div class="section-title">כללים למתן וקבלת משוב</div>
+    <section class="card hero">
+      <p>משוב איכותי הוא אחד הכלים החשובים ביותר בתהליך החניכה. הוא מאפשר למידה, צמיחה ושיפור מתמיד.</p>
+      <ul>
+        <li><b>ספציפי</b> – דוגמאות קונקרטיות</li>
+        <li><b>מאוזן</b> – חוזקות לצד נקודות לשיפור</li>
+        <li><b>מוכוון פעולה</b> – צעדים ברורים להמשך</li>
+      </ul>
+      <div class="small">המשך עבודה נמצא תחת ״צוערים״.</div>
+    </section>
   </main>
-
-<div style="position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;gap:10px;align-items:center;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;box-shadow:0 8px 18px rgba(0,0,0,.12);">
-  <button id="loginBtn" type="button" style="border:0;border-radius:10px;padding:10px 12px;background:#667eea;color:#fff;font-weight:700;cursor:pointer;">התחברות</button>
-  <button id="logoutBtn" type="button" style="border:1px solid #ddd;border-radius:10px;padding:10px 12px;background:#fff;font-weight:700;cursor:pointer;">התנתקות</button>
-  <span id="who" style="font-weight:700;color:#333;">לא מחובר</span>
-</div>
-
-<script>
-  function refreshUserLabel(){
-    const u = window.netlifyIdentity && window.netlifyIdentity.currentUser && window.netlifyIdentity.currentUser();
-    const label = document.getElementById("who");
-    if(!label) return;
-    label.textContent = u ? ("מחובר: " + ((u.user_metadata && u.user_metadata.full_name) || u.email)) : "לא מחובר";
-  }
-
-  if (window.netlifyIdentity) {
-    window.netlifyIdentity.on("init", refreshUserLabel);
-    window.netlifyIdentity.on("login", function(){ refreshUserLabel(); window.netlifyIdentity.close(); });
-    window.netlifyIdentity.on("logout", refreshUserLabel);
-    window.netlifyIdentity.init();
-  }
-
-  document.getElementById("loginBtn").addEventListener("click", function(){ window.netlifyIdentity && window.netlifyIdentity.open(); });
-  document.getElementById("logoutBtn").addEventListener("click", function(){ window.netlifyIdentity && window.netlifyIdentity.logout(); });
-</script>
-
 </body>
 </html>
