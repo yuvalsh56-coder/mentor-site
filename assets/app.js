@@ -142,6 +142,7 @@ function buildWeekCard(person, week){
     el("div", {class:"btnrow"}, [
       el("button", {class:"btn secondary", type:"button", onclick:()=>openDoc(person, week, "obs")}, ["דף תצפית + המשך"]),
       el("button", {class:"btn secondary", type:"button", onclick:()=>openDoc(person, week, "ref")}, ["דף רפלקציה"]),
+      el("button", {class:"btn secondary", type:"button", onclick:()=>openDoc(person, week, "note")}, ["דף תצפית – תיעוד חופשי"]),
       el("div", {class:"small"}, ["המסמכים נשמרים בענן משותף"])
     ])
   ]);
@@ -276,6 +277,17 @@ function buildRefForm(){
   f.appendChild(fs);
 }
 
+function buildNoteForm(){
+  const f = docForm();
+  f.innerHTML = "";
+  f.appendChild(el("fieldset", {}, [
+    el("legend", {}, ["תיעוד חופשי"]),
+    el("label", {}, ["תיעוד / הערות / סיכום"]),
+    el("textarea", {name:"note", placeholder:"כתבו כאן מלל חופשי לתיעוד..."})
+  ]));
+}
+
+
 function formToObject(form){
   const data = {};
   form.querySelectorAll("input, textarea").forEach(elm=>{
@@ -329,13 +341,18 @@ async function save(){
 
 function openDoc(person, week, doc){
   CURRENT = {person, week:String(week), doc};
+
   if(doc === "obs"){
     setModalTitle(`דף תצפית – שבוע ${week}`);
     buildObsForm();
-  } else {
+  } else if(doc === "ref"){
     setModalTitle(`דף רפלקציה – שבוע ${week}`);
     buildRefForm();
+  } else {
+    setModalTitle(`דף תיעוד חופשי – שבוע ${week}`);
+    buildNoteForm();
   }
+
   openModal();
   loadSaved();
 }
