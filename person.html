@@ -8,15 +8,15 @@
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css">
   <title>תיקייה</title>
-<script defer src="/assets/app.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <script defer src="/assets/app.js"></script>
 </head>
 <body>
   <div class="topbar">
     <div class="topbar-inner">
       <nav class="nav" aria-label="תפריט">
         <a href="/">דף הבית</a>
-        <a href="/staff.html">צוערים</a>
+        <a href="/staff.html">סגל</a>
         <a class="active" href="#" id="personNav">אישי</a>
       </nav>
       <span class="badge" id="saveMode">שמירה: בדפדפן</span>
@@ -45,8 +45,7 @@
 
       <div style="display:flex; gap:10px; justify-content:flex-end; padding:12px 0 4px;">
         <button class="btn secondary" type="button" id="reloadBtn">טען גרסה שמורה</button>
-        <button class="btn primary" type="button" id="pdfBtn">ייצוא PDF</button>
-          <button class="btn primary" type="button" id="saveBtn">שמירה</button>
+        <button class="btn primary" type="button" id="saveBtn">שמירה</button>
       </div>
       <div class="small" style="padding-bottom:6px;">שמירה כאן נשמרת בדפדפן של המכשיר. אם תפתח ממכשיר אחר – זה לא יופיע.</div>
     </div>
